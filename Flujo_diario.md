@@ -9,6 +9,49 @@ Este documento relata el flujo de trabajo diario utilizando la plataforma Beacon
 
 ---
 
+## Diagrama del Ciclo Diario
+
+```mermaid
+sequenceDiagram
+    participant Sala as [C] SALA (Clínico)
+    participant App as [B] PLATAFORMA BEACON
+    participant Bodega as [C] BODEGA (Administrativo)
+    participant Aud as Capa de Auditoría
+
+    rect rgb(240, 248, 255)
+        note right of Sala: 1. Origen de la Necesidad
+        Sala->>App: Busca insumos (Catálogo/Favoritos)
+        App-->>Sala: Confirma "Pedido Abierto"
+    end
+
+    rect rgb(255, 250, 240)
+        note right of App: 2. Notificación y Recepción
+        App->>Bodega: Alerta sonora "Nuevos pedidos pendientes"
+        Bodega->>App: Asume responsabilidad del pedido
+        App-->>Sala: Notifica "Pedido En Proceso"
+    end
+
+    rect rgb(245, 255, 250)
+        note right of Bodega: 3. Acción Física y Trazabilidad
+        Bodega->>Bodega: Recorre pasillos realizando el Picking
+        Bodega->>App: Ingresa Lotes / Cantidades reales
+        opt Quiebre de Stock
+            Bodega->>App: Marca como "Sin Procesar" + Motivo
+        end
+    end
+
+    rect rgb(253, 245, 230)
+        note right of Bodega: 4. Entrega Final
+        Bodega->>Sala: Entrega caja física con insumos
+        Bodega->>App: Cierra el ciclo (Genera Folio)
+        App-->>Aud: Registra "Pedido Cerrado"
+    end
+    
+    note over App,Aud: 5. Monitor en vivo / Descarga Excel a ERP
+```
+
+---
+
 ## 1. El Origen de la Necesidad (A -> B)
 El ciclo comienza en la **SALA [C]**, donde el **CLÍNICO [A]** evalúa su arsenal y detecta qué insumos necesita para la jornada.
 *   El Clínico toma su dispositivo móvil e ingresa a la **PLATAFORMA [B]**.
