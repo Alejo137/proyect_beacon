@@ -11,43 +11,38 @@ Este documento relata el flujo de trabajo diario utilizando la plataforma Beacon
 
 ## Diagrama del Ciclo Diario
 
+A continuación, la representación visual del proceso conectando los espacios físicos y la plataforma digital:
+
 ```mermaid
-sequenceDiagram
-    participant Sala as [C] SALA (Clínico)
-    participant App as [B] PLATAFORMA BEACON
-    participant Bodega as [C] BODEGA (Administrativo)
-    participant Aud as Capa de Auditoría
-
-    rect rgb(240, 248, 255)
-        note right of Sala: 1. Origen de la Necesidad
-        Sala->>App: Busca insumos (Catálogo/Favoritos)
-        App-->>Sala: Confirma "Pedido Abierto"
+flowchart TD
+    %% Definición de áreas
+    subgraph FISICO_SALA ["FÍSICO - SALA"]
+        C_Actor("🧑‍⚕️ CLÍNICO")
     end
 
-    rect rgb(255, 250, 240)
-        note right of App: 2. Notificación y Recepción
-        App->>Bodega: Alerta sonora "Nuevos pedidos pendientes"
-        Bodega->>App: Asume responsabilidad del pedido
-        App-->>Sala: Notifica "Pedido En Proceso"
+    subgraph DIGITAL ["DIGITAL - PLATAFORMA BEACON"]
+        P_Catalogo("🛒 1. Catálogo Móvil (Crea Solicitud)")
+        P_Bandeja("🔔 2. Bandeja Entrada (Alerta Sonora)")
+        P_Picking("📋 3. Interfaz Picking (Ingresa Lotes)")
+        P_BBDD[("📊 4. Cierre y Auditoría (Genera Folio)")]
     end
 
-    rect rgb(245, 255, 250)
-        note right of Bodega: 3. Acción Física y Trazabilidad
-        Bodega->>Bodega: Recorre pasillos realizando el Picking
-        Bodega->>App: Ingresa Lotes / Cantidades reales
-        opt Quiebre de Stock
-            Bodega->>App: Marca como "Sin Procesar" + Motivo
-        end
+    subgraph FISICO_BODEGA ["FÍSICO - BODEGA"]
+        A_Actor("🧑‍💼 ADMINISTRATIVO")
     end
 
-    rect rgb(253, 245, 230)
-        note right of Bodega: 4. Entrega Final
-        Bodega->>Sala: Entrega caja física con insumos
-        Bodega->>App: Cierra el ciclo (Genera Folio)
-        App-->>Aud: Registra "Pedido Cerrado"
-    end
+    %% Flujo de pasos
+    C_Actor ===>|"1. Pide insumos"| P_Catalogo
+    P_Catalogo -.->|"Status: ABIERTO"| P_Bandeja
     
-    note over App,Aud: 5. Monitor en vivo / Descarga Excel a ERP
+    P_Bandeja ===>|"2. Notifica nuevo pedido"| A_Actor
+    A_Actor ===>|"Asume pedido (EN PROCESO)"| P_Bandeja
+    
+    P_Bandeja -.->|"Carga lista de productos"| P_Picking
+    A_Actor ===>|"3. Realiza picking e ingresa datos"| P_Picking
+    
+    A_Actor ==== |"4. Entrega física de insumos"| C_Actor
+    P_Picking -.->|"Registra transacción"| P_BBDD
 ```
 
 ---
